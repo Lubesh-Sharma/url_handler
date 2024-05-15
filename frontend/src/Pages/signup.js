@@ -64,68 +64,68 @@ const SignUp = () => {
   };
 
   return (
-    <Container className="login-box">
+    <Container className="signup-box">
       <h1>Sign Up</h1>
-      <Form onSubmit={handleSignUp}>
-        <Form.Group controlId="username">
-          <Form.Label>User Name</Form.Label>
-          <Form.Control
-            className="username"
-            type="text"
-            placeholder="Enter User Name"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </Form.Group>
-        <Form.Group controlId="formBasicEmail">
-          <Form.Label>Email address</Form.Label>
-          <Form.Control
-            className="email"
-            type="email"
-            placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </Form.Group>
+      <div className="google-loginbox">
+        <GoogleLogin
+          className="google-login"
+          clientId="554645934751-n9n9vbk0f7pog6h0ff6mc21vqbr5dcej.apps.googleusercontent.com"
+          buttonText="Signin with Google"
+          onSuccess={responseGoogle}
+          onFailure={responseGoogle}
+          cookiePolicy={"single_host_origin"}
+        />
+      </div>
+      <div className="login-form">
+        <Form onSubmit={handleSignUp}>
+          <Form.Group controlId="formBasicName">
+            {/* <Form.Label>User Name</Form.Label> */}
+            <Form.Control
+              className="username"
+              // type="text"
+              placeholder="Enter User Name"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </Form.Group>
+          <Form.Group controlId="formBasicEmail">
+            {/* <Form.Label>Email address</Form.Label> */}
+            <Form.Control
+              className="email"
+              type="email"
+              placeholder="Enter email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Form.Group>
 
-        <Form.Group controlId="formBasicPassword">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            className="password"
-            type={showPassword ? "email" : "password"}
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          {/* <Button onClick={() => setShowPassword(!showPassword)}>
+          <Form.Group controlId="formBasicPassword">
+            {/* <Form.Label>Password</Form.Label> */}
+            <Form.Control
+              className="password"
+              type={showPassword ? "email" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            {/* <Button onClick={() => setShowPassword(!showPassword)}>
             {showPassword ? "Hide" : "Show"} Password
           </Button> */}
-        </Form.Group>
-        <div className="mt-3 text-center">
-          <p>
-            Already have an account ?{" "}
-            <Button
-              size="sm"
-              variant="outline-primary"
-              onClick={redirect_login}
-            >
-              Sign In
-            </Button>
-          </p>
-        </div>
-        <Button className="submit" type="submit" variant="primary">
-          SignUp
-        </Button>
-      </Form>
-      <p className="or"> OR</p>
-      <GoogleLogin
-        className="google-login"
-        clientId="554645934751-n9n9vbk0f7pog6h0ff6mc21vqbr5dcej.apps.googleusercontent.com"
-        buttonText="Signin with Google"
-        onSuccess={responseGoogle}
-        onFailure={responseGoogle}
-        cookiePolicy={"single_host_origin"}
-      />
+          </Form.Group>
+
+          <Button className="signup-button" type="submit" variant="primary">
+            SignUp
+          </Button>
+        </Form>
+      </div>
+      <div className="noaccount">
+        <p>
+          Already have an account ?{" "}
+          <span className="gotosignup" onClick={redirect_login}>
+            Sign In
+          </span>
+        </p>
+      </div>
     </Container>
   );
 };

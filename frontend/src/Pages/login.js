@@ -63,57 +63,62 @@ const LoginPage = () => {
 
   return (
     <Container className="login-box">
-      <h1>Sign in</h1>
-      <Form onSubmit={handleLogin}>
-        <Form.Group controlId="formBasicEmail">
-          <Form.Label>Email address</Form.Label>
-          <Form.Control
-            className="email"
-            type="email"
-            placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </Form.Group>
+      <h1>Welcome Back</h1>
+      <div className="google-loginbox">
+        <GoogleLogin
+          className="google-login"
+          clientId="554645934751-n9n9vbk0f7pog6h0ff6mc21vqbr5dcej.apps.googleusercontent.com"
+          buttonText="Login with Google"
+          onSuccess={responseGoogle}
+          onFailure={responseGoogle}
+          cookiePolicy={"single_host_origin"}
+        />
+      </div>
+      <div className="login-form">
+        <h3 className="emailSignin">Sign in with your email</h3>
+        <Form onSubmit={handleLogin}>
+          <Form.Group controlId="formBasicEmail">
+            {/* <Form.Label>Email address</Form.Label> */}
+            <Form.Control
+              className="email"
+              type="email"
+              placeholder="Enter email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Form.Group>
 
-        <Form.Group controlId="formBasicPassword">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            className="password"
-            type={showPassword ? "email" : "password"}
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          {/* <Button onClick={() => setShowPassword(!showPassword)}>
+          <Form.Group controlId="formBasicPassword">
+            {/* <Form.Label>Password</Form.Label> */}
+            <Form.Control
+              className="password"
+              type={showPassword ? "email" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            {/* <Button onClick={() => setShowPassword(!showPassword)}>
             {showPassword ? "Hide" : "Show"} Password
           </Button> */}
-        </Form.Group>
-        <div className="mt-3 text-center">
-          <p>
-            Don't have an account ?{" "}
-            <Button
-              size="sm"
-              variant="outline-primary"
-              onClick={redirect_register}
-            >
-              Sign Up
-            </Button>
-          </p>
-        </div>
-        <Button className="submit" type="submit" variant="primary">
-          Login
-        </Button>
-      </Form>
-      <p className="or"> OR</p>
-      <GoogleLogin
-        className="google-login"
-        clientId="554645934751-n9n9vbk0f7pog6h0ff6mc21vqbr5dcej.apps.googleusercontent.com"
-        buttonText="Login with Google"
-        onSuccess={responseGoogle}
-        onFailure={responseGoogle}
-        cookiePolicy={"single_host_origin"}
-      />
+          </Form.Group>
+          <div className="forgot-password">
+            <p>Forgot password?</p>
+          </div>
+          {/* <div className="login-container"> */}
+          <Button className="login-button" type="submit" variant="primary">
+            Login
+          </Button>
+          {/* </div> */}
+        </Form>
+      </div>
+      <div className="noaccount">
+        <p>
+          Don't have an account ?{" "}
+          <span className="gotosignup" onClick={redirect_register}>
+            Sign Up
+          </span>
+        </p>
+      </div>
     </Container>
   );
 };
