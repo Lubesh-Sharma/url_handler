@@ -6,22 +6,24 @@ import { BACKEND_URL } from "../constants";
 const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
 
-  const handleSignUp = async(e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
 
-    console.log("SignUp clicked with email:", email, "and password:", password);
-    try{
-      let resp=await axios.post(`${BACKEND_URL}/register`,{
+    console.log("SignUp clicked with name: ", name, " email:", email, "and password:", password);
+    try {
+      let resp = await axios.post(`${BACKEND_URL}/register`, {
+        username: name,
         email: email,
         password: password
       });
       console.log(resp);
-      if(resp.status === 200){
+      if (resp.status === 200) {
         alert("Successfully Signed Up please SignUp to Enjoy the services!!");
-        window.location.href="/login";
+        window.location.href = "/login";
       }
-    }catch(err){
+    } catch (err) {
       console.log(err);
     }
   };
@@ -30,6 +32,17 @@ const SignUp = () => {
     <Container className="login-box">
       <h1>Sign Up</h1>
       <Form onSubmit={handleSignUp}>
+        <Form.Group controlId="formBasicName">
+          <Form.Label>Name</Form.Label>
+          <Form.Control
+            className="name"
+            type="text"
+            placeholder="Enter Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </Form.Group>
+
         <Form.Group controlId="formBasicEmail">
           <Form.Label>Email address</Form.Label>
           <Form.Control

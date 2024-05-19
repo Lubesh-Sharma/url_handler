@@ -73,6 +73,7 @@ const HomePageLoggedin = () => {
   return (
     <div className="home-container">
       <div className="home-item-box">
+        <h1></h1>
         <h1>Shorten Your Loooong Links :)</h1>
         <p style={{ marginTop: "25px" }}>
           Linkly is an efficient and easy-to-use URL shortening service that

@@ -19,7 +19,7 @@ const LoginPage = () => {
       console.log(resp);
       if(resp.status === 200){
         alert("You have been Logged in!!");
-        window.location.href="/loggedin";
+        window.location.href="/loggedin/"+resp.data.user._id;
       }
     }catch(err){
       console.log(err);
