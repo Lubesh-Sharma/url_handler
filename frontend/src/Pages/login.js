@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Container, Form, Button } from "react-bootstrap";
 import axios from "axios";
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
 import { BACKEND_URL } from "../constants";
-import { GoogleLogin } from "react-google-login";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -21,59 +22,121 @@ const LoginPage = () => {
 
     console.log("Login clicked with email:", email, "and password:", password);
     try {
-      let resp = await axios.post(`${BACKEND_URL}/login`, {
-        email: email,
-        password: password,
-      });
-      console.log(resp);
+      let resp = await axios.post(`${BACKEND_URL}/login`,
+        {
+          email: email,
+          password: password,
+        },
+        {
+          withCredentials: true
+        }
+      );
+
       if (resp.status === 200) {
-        alert("You have been Logged in!!");
-        window.location.href="/loggedin/"+resp.data.user._id;
+
+        const token = resp.data.token;
+        const previousToken = localStorage.getItem('jwtToken');
+        if (previousToken) {
+          // If a previous token exists, remove it
+          localStorage.removeItem('jwtToken');
+        }
+
+        // Store the new token in localStorage
+        localStorage.setItem('jwtToken', token);
+
+        const protectedResponse = await axios.get(
+          `${BACKEND_URL}/authenticate`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+          {
+            withCredentials: true
+          }
+        );
+        if (protectedResponse.status === 200) {
+          alert("You have been Logged in!!");
+          window.location.href = "/loggedin/" + resp.data.user._id;
+        }
       }
     } catch (err) {
       console.log(err);
     }
   };
 
+
   const responseGoogle = async (response) => {
-    console.log(response);
-    if (response.error) {
-      // Google login failed
-      console.error("Google login error:", response.error);
-      return;
-    }
-    const { email, givenName: username } = response.profileObj;
-
     try {
-      let resp = await axios.post(`${BACKEND_URL}/register`, {
-        email,
-        username,
-      });
+      const decoded = jwtDecode(response.credential);
+      const { email, name } = decoded;
+      console.log(email, name);
 
-      console.log(resp);
+      try {
+        console.log("Login Initiated")
+        const resp = await axios.post(`${BACKEND_URL}/login`, {
+          email,
+          password: "abcd",
+        },
+          {
+            withCredentials: true,
+          });
 
-      if (resp.status === 200) {
-        alert("Successfully Signed Up please SignUp to Enjoy the services!!");
-        window.location.href = "/login";
+        if (resp.status === 200) {
+          const token = resp.data.token;
+          const previousToken = localStorage.getItem('jwtToken');
+          if (previousToken) {
+            // If a previous token exists, remove it
+            localStorage.removeItem('jwtToken');
+          }
+
+          // Store the new token in localStorage
+          localStorage.setItem('jwtToken', token);
+
+          const protectedResponse = await axios.get(
+            `${BACKEND_URL}/authenticate`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+            {
+              withCredentials: true
+            }
+          );
+          if (protectedResponse.status === 200) {
+            alert("You have been Logged in!!");
+            window.location.href = "/loggedin/" + resp.data.user._id;
+          }
+        }
+      } catch (loginErr) {
+        console.log(loginErr);
       }
-    } catch (err) {
-      console.log(err);
+    } catch (decodeErr) {
+      console.error("JWT decode error:", decodeErr);
     }
   };
 
   return (
     <Container className="login-box">
       <h1>Welcome Back</h1>
-      <div className="google-loginbox">
-        <GoogleLogin
-          className="google-login"
-          clientId="554645934751-n9n9vbk0f7pog6h0ff6mc21vqbr5dcej.apps.googleusercontent.com"
-          buttonText="Login with Google"
-          onSuccess={responseGoogle}
-          onFailure={responseGoogle}
-          cookiePolicy={"single_host_origin"}
-        />
-      </div>
+      <GoogleOAuthProvider clientId="452039880540-839i29lt3kh4for9f2jidk9hns0fkp3v.apps.googleusercontent.com">
+        <div className="google-loginbox">
+          <GoogleLogin
+            buttonText="Login with Google"
+            onSuccess={responseGoogle}
+            onError={(err) => {
+              if (err.error === "popup_closed_by_user") {
+                alert("Popup closed by user before completing login.");
+              } else if (err.error === "idpiframe_initialization_failed") {
+                alert("Initialization failed. Please check your Client ID and authorized origins.");
+              } else {
+                console.error("Google login error:", err);
+              }
+            }}
+          />
+        </div>
+      </GoogleOAuthProvider>
       <div className="login-form">
         <h3 className="emailSignin">Sign in with your email</h3>
         <Form onSubmit={handleLogin}>

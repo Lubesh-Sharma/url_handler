@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Container, Form, Button } from "react-bootstrap";
 import axios from "axios";
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
 import { BACKEND_URL } from "../constants";
-import { GoogleLogin } from "react-google-login";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -11,85 +12,89 @@ const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const redirect_login = () => {
-    try {
-      window.location.href = "/login";
-    } catch (err) {
-      console.log(err);
-    }
+    window.location.href = "/login";
   };
+
   const handleSignUp = async (e) => {
     e.preventDefault();
 
-    console.log("SignUp clicked with name: ", name, " email:", email, "and password:", password);
     try {
-      let resp = await axios.post(`${BACKEND_URL}/register`, {
-        username: name,
-        email: email,
-        password: password,
-        username: username,
-      });
-      console.log(resp);
-      if (resp.status === 200) {
-        alert("Successfully Signed Up please SignUp to Enjoy the services!!");
+      const resp = await axios.post(`${BACKEND_URL}/register`, {
+        username,
+        email,
+        password,
+      },
+        { withCredentials: true }
+      );
+
+      if (resp.status === 201) {
+        alert("Successfully Signed Up! Please Sign In to Enjoy the Services!!");
         window.location.href = "/login";
       }
     } catch (err) {
       console.log(err);
     }
   };
+
   const responseGoogle = async (response) => {
-    console.log(response);
-    if (response.error) {
-      // Google login failed
-      console.error("Google login error:", response.error);
-      return;
-    }
-    const { email, givenName: username } = response.profileObj;
-
     try {
-      let resp = await axios.post(`${BACKEND_URL}/register`, {
-        email,
-        username,
-      });
+      const decoded = jwtDecode(response.credential);
+      const { email, name } = decoded;
+      console.log(email, name);
 
-      console.log(resp);
+      try {
+        console.log("Google signup request received");
+        const registerResp = await axios.post(`${BACKEND_URL}/register`, {
+          email,
+          username: name,
+          password: "abcd", // Consider using a more secure approach for passwords
+        },
+          { withCredentials: true }
+        );
 
-      if (resp.status === 200) {
-        alert("Successfully Signed Up please SignUp to Enjoy the services!!");
-        window.location.href = "/login";
+        if (registerResp.status === 201) {
+          alert("Successfully Signed Up! Please Sign In to Enjoy the Services!!");
+          window.location.href = "/login";
+        }
+      } catch (registerErr) {
+        console.log(registerErr);
       }
-    } catch (err) {
-      console.log(err);
+    } catch (decodeErr) {
+      console.error("JWT decode error:", decodeErr);
     }
   };
 
   return (
     <Container className="signup-box">
       <h1>Sign Up</h1>
-      <div className="google-loginbox">
-        <GoogleLogin
-          className="google-login"
-          clientId="554645934751-n9n9vbk0f7pog6h0ff6mc21vqbr5dcej.apps.googleusercontent.com"
-          buttonText="Signin with Google"
-          onSuccess={responseGoogle}
-          onFailure={responseGoogle}
-          cookiePolicy={"single_host_origin"}
-        />
-      </div>
+      <GoogleOAuthProvider clientId="452039880540-839i29lt3kh4for9f2jidk9hns0fkp3v.apps.googleusercontent.com">
+        <div className="google-loginbox">
+          <GoogleLogin
+            onSuccess={responseGoogle}
+            buttonText="Signup with Google"
+            onError={(err) => {
+              if (err.error === "popup_closed_by_user") {
+                alert("Popup closed by user before completing login.");
+              } else if (err.error === "idpiframe_initialization_failed") {
+                alert("Initialization failed. Please check your Client ID and authorized origins.");
+              } else {
+                console.error("Google login error:", err);
+              }
+            }}
+          />
+        </div>
+      </GoogleOAuthProvider>
       <div className="login-form">
         <Form onSubmit={handleSignUp}>
           <Form.Group controlId="formBasicName">
-            {/* <Form.Label>User Name</Form.Label> */}
             <Form.Control
               className="username"
-              // type="text"
               placeholder="Enter User Name"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
           </Form.Group>
           <Form.Group controlId="formBasicEmail">
-            {/* <Form.Label>Email address</Form.Label> */}
             <Form.Control
               className="email"
               type="email"
@@ -98,21 +103,15 @@ const SignUp = () => {
               onChange={(e) => setEmail(e.target.value)}
             />
           </Form.Group>
-
           <Form.Group controlId="formBasicPassword">
-            {/* <Form.Label>Password</Form.Label> */}
             <Form.Control
               className="password"
-              type={showPassword ? "email" : "password"}
+              type={showPassword ? "text" : "password"}
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            {/* <Button onClick={() => setShowPassword(!showPassword)}>
-            {showPassword ? "Hide" : "Show"} Password
-          </Button> */}
           </Form.Group>
-
           <Button className="signup-button" type="submit" variant="primary">
             SignUp
           </Button>
@@ -120,7 +119,7 @@ const SignUp = () => {
       </div>
       <div className="noaccount">
         <p>
-          Already have an account ?{" "}
+          Already have an account?{" "}
           <span className="gotosignup" onClick={redirect_login}>
             Sign In
           </span>

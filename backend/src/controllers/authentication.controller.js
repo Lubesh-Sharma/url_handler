@@ -5,7 +5,6 @@ import { asyncHandler } from "../utilities/asyncHandler.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 // import passport from "passport";
-import { OAuth2Client } from 'google-auth-library';
 
 export const registerUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
@@ -48,7 +47,7 @@ export const registerUser = asyncHandler(async (req, res) => {
         });
     });
   } catch (error) {
-    console.error("Error finding user:", error);
+    console.error("Error registering user:", error);
     throw new ApiError(500, "Internal Server Error");
   }
 });
@@ -84,7 +83,9 @@ export const loginUser = asyncHandler(async (req, res) => {
         },
         process.env.JWT_KEY,
       );
-      res.cookie('jwtToken', token, { httpOnly: true, secure: true, maxAge: 3600000 * 24 * 7 });
+      res.cookie('jwtToken', token, {
+        sameSite: 'None', httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 3600000
+      });
       return res.status(200).send({
         message: 'Auth successful',
         token: token,
@@ -102,8 +103,7 @@ export const authenticateUser = asyncHandler(async (req, res) => {
     const bearerHeader = req.headers.authorization;
     const token = bearerHeader.split(' ')[1]
     const decodedToken = jwt.verify(token, process.env.JWT_KEY);
-    const user = await User.findById(decodedToken.userId)
-    // .populate('subscription')
+    const user = await User.findById(decodedToken.userId).populate('subscription')
     res.status(200).json({
       "user": user,
     });
@@ -113,72 +113,9 @@ export const authenticateUser = asyncHandler(async (req, res) => {
       message: "Some Error Occurred"
     });
   }
-})
-
+});
 
 export const logoutUser = asyncHandler(async (req, res) => {
   res.clearCookie('jwtToken');
   res.redirect(200, 'http://localhost:3000/');
-});
-
-export const googleLogin = asyncHandler(async (req, res) => {
-  try {
-    const googleToken = req.body.token;
-    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-    const ticket = await client.verifyIdToken({
-      idToken: googleToken,
-      audience: process.env.GOOGLE_CLIENT_ID
-    });
-
-    if (!ticket) {
-      return res.status(401).json({
-        message: 'Google login failed'
-      });
-    }
-
-    const payload = ticket.getPayload();
-
-    if (!payload.email_verified) {
-      return res.status(404).json({
-        message: 'Email not verified'
-      });
-    }
-
-    const { email, name } = payload;
-    console.log(email);
-
-    let user = await User.findOne({ email });
-
-    if (!user) {
-      // If user is not found, create a new user
-      user = new User({
-        email: email,
-        username: name, // Assuming you want to save the name as well
-        password: '',
-      });
-
-      await user.save();
-    }
-
-    const token = jwt.sign(
-      {
-        email: user.email,
-        userId: user._id
-      },
-      process.env.JWT_KEY
-    );
-
-    res.cookie('jwtToken', token, { httpOnly: true, secure: true, maxAge: 3600000 * 24 * 7 });
-
-    return res.status(200).json({
-      message: 'Google Auth successful',
-      token,
-      user,
-    });
-  } catch (error) {
-    console.error('Some error has occurred:', error);
-    res.status(500).json({
-      message: 'Internal server error',
-    });
-  }
 });
