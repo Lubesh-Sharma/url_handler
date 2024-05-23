@@ -17,21 +17,13 @@ const userSchema = mongoose.Schema({
         required: true,
         default: "123456",
     },
-    // mobileNumber: {
-    //     type: String,
-    //     default: null,
-    // },
-    // profilePicture: {
-    //     type: String,
-    //     default: null,
-    // },
-    // role: {
-    //     type: Boolean,
-    //     default: false
-    // },
     subscription: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Subscription',
+        type: String,
+        enum: ['Free', 'Standard', 'Premium'],
+        default: 'Free',
+    },
+    endDateOfSubscription: {
+        type: Date,
         default: null
     },
     lastPayment: {
@@ -47,33 +39,8 @@ const userSchema = mongoose.Schema({
             type: [String],
             default: null
         }
-    },
-    // devicesLogged: {
-    //     type: Number,
-    //     default: 0,
-    // },
-    transactions: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: 'Transaction',
-        default: []
-    },
-    refreshToken: {
-        type: String,
-        default: null,
-    },
+    }
 });
-
-userSchema.methods.isPasswordCorrect = async function (password) {
-    return password === this.password;
-};
-
-userSchema.methods.generateAccessToken = function () {
-    return jwt.sign({ _id: this._id }, process.env.JWT_KEY, { expiresIn: '1h' });
-};
-
-userSchema.methods.generateRefreshToken = function () {
-    return jwt.sign({ _id: this._id }, process.env.JWT_KEY, { expiresIn: '7d' });
-};
 
 export const User = mongoose.model('User', userSchema);
 

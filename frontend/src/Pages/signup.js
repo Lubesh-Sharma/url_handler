@@ -32,6 +32,7 @@ const SignUp = () => {
         window.location.href = "/login";
       }
     } catch (err) {
+      alert("Error signing up", err);
       console.log(err);
     }
   };
@@ -57,6 +58,7 @@ const SignUp = () => {
           window.location.href = "/login";
         }
       } catch (registerErr) {
+        alert("Error sign up with Google", registerErr);
         console.log(registerErr);
       }
     } catch (decodeErr) {

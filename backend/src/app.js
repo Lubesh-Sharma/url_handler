@@ -9,18 +9,9 @@ const app = express();
 app.use(bodyParser.json({ limit: '5mb' }));
 app.get("/", (req, res) => res.send("Hello"));
 
-// Ensure environment variables are properly loaded
-const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ["http://localhost:3000"];
-
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true
   })
@@ -37,13 +28,11 @@ app.use(session({
 }));
 
 import authenticationRouter from "./routers/authentication.router.js";
-import userRouter from "./routers/user.router.js";
-// import searchRouter from "./routers/search.router.js";
-// import SubscriptionRouter from "./routers/subscription.router.js";
+import SubscriptionRouter from "./routers/subscription.router.js";
+import paymentRouter from "./routers/payment.router.js";
 
+app.use('/', SubscriptionRouter);
 app.use('/', authenticationRouter);
-app.use("/users", userRouter);
-// app.use("/search", searchRouter);
-// app.use("/subscription", SubscriptionRouter);
+app.use('/', paymentRouter);
 
 export default app;

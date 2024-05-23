@@ -1,13 +1,15 @@
-import React, { useState,useEffect,useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Dashboard from "../components/DashBoard";
 import api from '../api/axiosConfig';
+import axios from "axios";
+import { BACKEND_URL } from "../constants";
+
 const HomePageLoggedin = () => {
-    const [url, setUrl] = useState("");
-  // const getAllUrls=async()=>{
-  //   return [];
-  // };
-  const [listUrls,setListUrls]=useState([]);
+  const [url, setUrl] = useState("");
+  const [listUrls, setListUrls] = useState([]);
+  const [user, setUser] = useState(null);
+
   const getCookie = (name) => {
     const cookieString = document.cookie;
     const cookies = cookieString.split(';');
@@ -19,7 +21,8 @@ const HomePageLoggedin = () => {
     }
     return null;
   };
-  const [linkCount, setLinkCount] = useState(()=>{
+
+  const [linkCount, setLinkCount] = useState(() => {
     const cookieValue = getCookie('linkCount');
     return cookieValue || 0;
   });
@@ -27,18 +30,38 @@ const HomePageLoggedin = () => {
   useEffect(() => {
     document.cookie = `linkCount=${linkCount}; expires=Wed, 1 Jan 2025 00:00:00 UTC; path=/;`;
     console.log(document.cookie);
-  },[linkCount]);
-  // const retA=(listUrl)=>{
-  //   let a=[];
-  //   for(let i=0;i<listUrl.length;i++){
-  //     a=[...a,{shortLink: listUrl[i]["short"],longLink: listUrl[i]["long"],qrCode: "QR Code 1",clicks: listUrl[i]["counter"],del: "",}];
-  //   }
-  //   return a;
-  // }
-  // const data = useMemo(() => retA(listUrls),[listUrls]);
-  const addListUrl=(val)=>{
-    setListUrls((t)=>[...t,val]);
-  }
+  }, [linkCount]);
+
+  useEffect(() => {
+    const authenticateUser = async () => {
+      try {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) throw new Error("No token found");
+
+        const response = await axios.get(`${BACKEND_URL}/authenticate`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 200) {
+          console.log("Authenticated");
+          setUser(response.data.user);
+        } else {
+          throw new Error("Not authenticated");
+        }
+      } catch (err) {
+        console.log(err);
+        window.location.href = "/login";
+      }
+    };
+    authenticateUser();
+  }, []);
+
+  const addListUrl = (val) => {
+    setListUrls((t) => [...t, val]);
+  };
+
   const shortenUrl = async () => {
     if (linkCount >= 100) {
       alert(
@@ -46,35 +69,39 @@ const HomePageLoggedin = () => {
       );
       return;
     }
-    try
-        {   if(url === ""){
-              return url;
-            }
-            const response = await api.post("/shorten",{long:url});
-            const resp=await api.post("/api/getShortUrl",{long:url});
-            console.log(resp);
-            console.log(response);
-            if (resp.status === 200){
-              setUrl("http://localhost:4000/"+resp.data.short);
-              setLinkCount(linkCount + 1);
-              if(response.status === 200){
-                addListUrl(resp.data);
-                console.log(listUrls);
-              }
-            }
+    try {
+      if (url === "") {
+        return;
+      }
+      const response = await api.post("/api/shorten", { long: url });
+      if (response.status === 200) {
+        const shortUrl = response.data.short;
+        setUrl(`http://localhost:8000/${shortUrl}`);
+        setLinkCount(linkCount + 1);
+        addListUrl(response.data);
+        console.log(listUrls);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-        }
-        catch(err)
-        {
-            console.error(err);
-        }
+  const updateUser = (newUserData) => {
+    setUser(newUserData);
   };
 
   return (
     <div className="home-container">
       <div className="home-item-box">
-        <h1></h1>
-        <h1>Shorten Your Loooong Links :)</h1>
+        {user ? (
+          <>
+            <h1>Welcome, {user.username}!</h1>
+            
+            <h1>Shorten Your Loooong Links :)</h1>
+          </>
+        ) : (
+          <h1>Loading...</h1>
+        )}
         <p style={{ marginTop: "25px" }}>
           Linkly is an efficient and easy-to-use URL shortening service that
           streamlines your online experience.
@@ -86,37 +113,38 @@ const HomePageLoggedin = () => {
             onChange={(e) => setUrl(e.target.value)}
             placeholder="Your URL here"
           />
-
           <button type="submit" className="abs-submit" onClick={shortenUrl}>
             Shorten Now!
           </button>
         </div>
-        <p>
-          You can create{" "}
-          <span
-            style={{ color: "skyblue", fontSize: "1.1rem", fontWeight: "30" }}
-          >
-            {100 - linkCount}
-          </span>{" "}
-          more links.{" "}
-          <Link to="/subscription" className="register-link">
-            Take Premium Now
-          </Link>{" "}
-          to enjoy Unlimited Usage
-        </p>
-
-        {/* Add more features like copy to clipboard etc. */}
+        {user && (user.subscription === "Free" || user.subscription === null) && (
+          <p>
+            You can create{" "}
+            <span
+              style={{ color: "skyblue", fontSize: "1.1rem", fontWeight: "30" }}
+            >
+              {100 - linkCount}
+            </span>{" "}
+            more links.{" "}
+            <Link to={`/loggedin/${user._id}/subscription`} className="register-link">
+              Take Premium Now
+            </Link>{" "}
+            to enjoy Unlimited Usage
+          </p>
+        )}
       </div>
-      <div className="home-premium-box">
-        <h2>Want More?</h2>
-        <h1>Go Premium!</h1>
-        <div className="button-container">
-          <button className="create-free">Go Premium</button>
+      {user && (user.subscription === "Free" || user.subscription === null) && (
+        <div className="home-premium-box">
+          <h2>Want More?</h2>
+          <h1>Go Premium!</h1>
+          <div className="button-container">
+            <button className="create-free">Go Premium</button>
+          </div>
         </div>
-      </div>
+      )}
       <Dashboard />
     </div>
   );
-}
- 
+};
+
 export default HomePageLoggedin;

@@ -7,6 +7,7 @@ import Navbar from "./components/navbar";
 import NavbarLoggedin from "./components/navbarlogin";
 import LoginPage from "./Pages/login";
 import SignUp from "./Pages/signup";
+import { BACKEND_URL } from "./constants";
 
 function App() {
   return (
@@ -15,8 +16,8 @@ function App() {
         <Navbars />
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/loggedin/:user_id/subscription" element={<Subscription />} />
           <Route path="/loggedin/:user_id" element={<HomePageLoggedin />} />
-          <Route path="/subscription" element={<Subscription />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUp />} />
         </Routes>

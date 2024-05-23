@@ -43,24 +43,11 @@ const LoginPage = () => {
 
         // Store the new token in localStorage
         localStorage.setItem('jwtToken', token);
-
-        const protectedResponse = await axios.get(
-          `${BACKEND_URL}/authenticate`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-          {
-            withCredentials: true
-          }
-        );
-        if (protectedResponse.status === 200) {
-          alert("You have been Logged in!!");
-          window.location.href = "/loggedin/" + resp.data.user._id;
-        }
+        alert("You have been Logged in!!");
+        window.location.href = "/loggedin/" + resp.data.user._id;
       }
     } catch (err) {
+      alert("Error signing in", err);
       console.log(err);
     }
   };
@@ -92,24 +79,11 @@ const LoginPage = () => {
 
           // Store the new token in localStorage
           localStorage.setItem('jwtToken', token);
-
-          const protectedResponse = await axios.get(
-            `${BACKEND_URL}/authenticate`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            },
-            {
-              withCredentials: true
-            }
-          );
-          if (protectedResponse.status === 200) {
-            alert("You have been Logged in!!");
-            window.location.href = "/loggedin/" + resp.data.user._id;
-          }
+          alert("You have been Logged in!!");
+          window.location.href = "/loggedin/" + resp.data.user._id;
         }
       } catch (loginErr) {
+        alert("Error signing in with Google", loginErr);
         console.log(loginErr);
       }
     } catch (decodeErr) {

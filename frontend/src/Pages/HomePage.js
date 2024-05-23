@@ -56,7 +56,7 @@ const HomePage = () => {
             console.log(resp);
             console.log(response);
             if (resp.status === 200){
-              setUrl("http://localhost:4000/"+resp.data.short);
+              setUrl("http://localhost:8000/"+resp.data.short);
               setLinkCount(linkCount + 1);
               if(response.status === 200){
                 addListUrl(resp.data);

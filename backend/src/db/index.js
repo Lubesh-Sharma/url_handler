@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import { config } from 'dotenv';
 config();
 
-let DB_URL = process.env.DB_URL || "mongodb://localhost:4000";
+let DB_URL = process.env.DB_URL || "mongodb://localhost:8000";
 
 const connectDB = async () => {
   try {

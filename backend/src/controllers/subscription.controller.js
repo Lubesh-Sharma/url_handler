@@ -1,59 +1,34 @@
-import { Subscription } from "../models/Subscription.js";
+import { User } from "../models/User.js";
+import { ApiError } from "../utilities/ApiError.js";
 import { asyncHandler } from "../utilities/asyncHandler.js";
 
-export const get_All_SubscriptionPlan = asyncHandler(async (req, res) => {
-    try {
-      const subscriptions = await Subscription.find({});
-      res.send(subscriptions);
-    } catch (error) {
-      res.status(500).send(error);
-    }
-  });
+export const changeUserSubscription = asyncHandler(async (req, res) => {
+    const user_id = req.params.user_id;
+    console.log(user_id);
+    const user = await User.findById(user_id);
 
-export const get_SubscriptionPlan_ById = asyncHandler(async (req, res) => {
-  try {
-    const subscription = await Subscription.findById(req.params.id);
-    if (!subscription) {
-      res.status(404).send();
+    if (!user) {
+        throw new ApiError(404, "User not found");
     } else {
-      res.send(subscription);
+        const { subscriptionType } = req.body; // Extract subscriptionType from req.body
+        console.log("New subscription:", subscriptionType);
+
+        if (!subscriptionType) {
+            throw new ApiError(400, "Subscription type is required");
+        }
+
+        user.subscription = subscriptionType; // Assign the subscriptionType directly
+        user.save()
+            .then(result => {
+                res.status(201).json({
+                    message: "Subscription updated"
+                });
+            })
+            .catch(err => {
+                console.error("Error saving user:", err);
+                res.status(504).json({
+                    error: err
+                });
+            });
     }
-  } catch (error) {
-    res.status(500).send(error);
-  }
 });
-
-
-export const Create_SubscriptionPlan = asyncHandler(async (req,res) => {
-  try {
-      const subscription = new Subscription(req.body);
-      await subscription.save();
-      res.status(201).send(subscription);
-  } catch (error) {
-      res.status(400).send(error);
-  }
-}) ;
-
-export const Update_SubscriptionPlan = asyncHandler(async (req,res) => {
-  try {
-      const subscription = await Subscription.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-      if (!subscription) {
-          return res.status(404).send();
-      }
-      res.send(subscription);
-  } catch (error) {
-      res.status(400).send(error);
-  }
-}) ;
-
-export const Delete_SubscriptionPlan = asyncHandler(async (req,res) => {
-  try {
-      const subscription = await Subscription.findByIdAndDelete(req.params.id);
-      if (!subscription) {
-          return res.status(404).send();
-      }
-      res.send(subscription);
-  } catch (error) {
-      res.status(500).send(error);
-  }
-}) ;
