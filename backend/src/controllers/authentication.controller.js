@@ -1,4 +1,3 @@
-import { Subscription } from "../models/Subscription.js";
 import { User } from "../models/User.js";
 import { ApiError } from "../utilities/ApiError.js";
 import { asyncHandler } from "../utilities/asyncHandler.js";
@@ -84,7 +83,7 @@ export const loginUser = asyncHandler(async (req, res) => {
         process.env.JWT_KEY,
       );
       res.cookie('jwtToken', token, {
-        sameSite: 'None', httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 3600000
+        sameSite: 'None', httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 3600*1000*2
       });
       return res.status(200).send({
         message: 'Auth successful',
