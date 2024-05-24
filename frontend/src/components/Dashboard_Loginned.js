@@ -3,19 +3,74 @@ import { useTable } from "react-table";
 import { IoCopy } from "react-icons/io5";
 import { useMediaQuery } from "react-responsive";
 import { IoIosArrowDropdown } from "react-icons/io";
+import axios from "axios";
+import { BACKEND_URL } from "../constants";
 
-const Dashboard = () => {
+const Dashboard_Loginned = () => {
   const isMobile = useMediaQuery({ query: "(max-width: 760px)" });
   const [urls, setUrls] = useState([]);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const storedUrls = JSON.parse(localStorage.getItem('urls')) || [];
-      setUrls(storedUrls);
-    }, 200);
+    const authenticateUser = async () => {
+      try {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) throw new Error("No token found");
 
-    return () => clearInterval(interval);
+        const response = await axios.get(`${BACKEND_URL}/authenticate`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 200) {
+          setUser(response.data.user);
+        } else {
+          throw new Error("Not authenticated");
+        }
+      } catch (err) {
+        console.log(err);
+        window.location.href = "/login";
+      }
+    };
+
+    authenticateUser();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      const fetchUrls = async () => {
+        try {
+          const token = localStorage.getItem("jwtToken");
+          if (!token) throw new Error("No token found");
+
+          const response = await axios.get(`${BACKEND_URL}/loggedin/${user._id}/urls`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (response.status === 200) {
+            const transformedUrls = response.data.urls.newLink.map((newLink, index) => ({
+              shortUrl: newLink,
+              longUrl: response.data.urls.oldLink[index],
+              qrCode: "-", // Assuming you don't have QR code data in the response
+              clicks: (user.subscription === "Free" || user.subscription === null || new Date(user.endDateOfSubscription) < new Date()) ? "-" : user.Viewer[index] || 0,
+            }));
+            setUrls(transformedUrls);
+          } else {
+            throw new Error("Failed to fetch URLs");
+          }
+        } catch (error) {
+          console.error("Error fetching URLs:", error);
+        }
+      };
+
+      fetchUrls();
+    }
+  }, [user]);
+
+  const subscription = user && user.subscription;
 
   const dashboardColumns = useMemo(
     () => [
@@ -37,25 +92,21 @@ const Dashboard = () => {
           </a>
         ),
       },
-      ...(!isMobile
-        ? [
-            {
-              Header: "QR Code",
-              accessor: "qrCode",
-              Cell: () => "-",
-            },
-            {
-              Header: "Clicks",
-              accessor: "clicks",
-              Cell: () => "-",
-            },
-          ]
-        : []),
+      {
+        Header: "QR Code",
+        accessor: "qrCode",
+        Cell: ({ cell: { value } }) => ("-"),
+      },
+      {
+        Header: "Clicks",
+        accessor: "clicks",
+        Cell: ({ cell: { value } }) => value,
+      },
     ],
-    [isMobile]
+    []
   );
 
-  const data = useMemo(() => urls, [urls]);
+  const data = useMemo(() => Array.isArray(urls) ? urls : [], [urls]);
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({ columns: dashboardColumns, data });
 
@@ -154,4 +205,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Dashboard_Loginned;

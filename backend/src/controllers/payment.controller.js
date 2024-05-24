@@ -9,8 +9,6 @@ export const newPayment = async (req, res) => {
 
         let merchantTransactionId = req.body.transactionId;
 
-        console.log("The user id passed is ",req.body.userId);
-
         const data = {
             userId: req.body.userId,
             merchantId: merchant_id,
@@ -49,7 +47,6 @@ export const newPayment = async (req, res) => {
         }
 
         await axios(options).then(function (response) {
-            console.log("The response is", response.data);
             return res.json(response.data)
 
         }).catch(function (error) {
@@ -67,8 +64,6 @@ export const checkStatus = async (req, res) => {
     const userId = req.query.userId
     const merchantId = merchant_id
     const subscriptionType = req.query.name
-
-    console.log("In the checkStaus function userId", userId,"MerchantId", merchantTransactionId,"Token", token2);
 
     const keyIndex = 1
     const string = `/pg/v1/status/${merchantId}/${merchantTransactionId}` + salt_key;

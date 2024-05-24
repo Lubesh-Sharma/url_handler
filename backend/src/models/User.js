@@ -26,10 +26,6 @@ const userSchema = mongoose.Schema({
         type: Date,
         default: null
     },
-    lastPayment: {
-        type: Date,
-        default: null
-    },
     Links: {
         newLink: {
             type: [String],
@@ -39,6 +35,10 @@ const userSchema = mongoose.Schema({
             type: [String],
             default: null
         }
+    },
+    Viewer: {
+        type:[Number],
+        default: null
     }
 });
 

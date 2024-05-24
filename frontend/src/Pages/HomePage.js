@@ -1,74 +1,61 @@
-import React, { useState,useEffect,useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Dashboard from "../components/DashBoard";
-import api from '../api/axiosConfig';
 
 const HomePage = () => {
   const [url, setUrl] = useState("");
-  // const getAllUrls=async()=>{
-  //   return [];
-  // };
-  const [listUrls,setListUrls]=useState([]);
-  const getCookie = (name) => {
-    const cookieString = document.cookie;
-    const cookies = cookieString.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.startsWith(name + '=')) {
-        return Number(cookie.substring(name.length + 1));
-      }
-    }
-    return null;
-  };
-  const [linkCount, setLinkCount] = useState(()=>{
-    const cookieValue = getCookie('linkCount');
-    return cookieValue || 0;
-  });
+  const [listUrls, setListUrls] = useState([]);
 
   useEffect(() => {
-    document.cookie = `linkCount=${linkCount}; expires=Wed, 1 Jan 2025 00:00:00 UTC; path=/;`;
-    console.log(document.cookie);
-  },[linkCount]);
-  // const retA=(listUrl)=>{
-  //   let a=[];
-  //   for(let i=0;i<listUrl.length;i++){
-  //     a=[...a,{shortLink: listUrl[i]["short"],longLink: listUrl[i]["long"],qrCode: "QR Code 1",clicks: listUrl[i]["counter"],del: "",}];
-  //   }
-  //   return a;
-  // }
-  // const data = useMemo(() => retA(listUrls),[listUrls]);
-  const addListUrl=(val)=>{
-    setListUrls((t)=>[...t,val]);
-  }
-  const shortenUrl = async () => {
-    if (linkCount >= 15) {
-      alert(
-        "You have reached the maximum number of links. Please register to create more links."
-      );
+    const storedUrls = JSON.parse(localStorage.getItem('urls')) || [];
+    setListUrls(storedUrls);
+  }, []);
+
+  const getUsageCount = () => {
+    return parseInt(localStorage.getItem('usageCount')) || 0;
+  };
+
+  const incrementUsageCount = () => {
+    let count = getUsageCount();
+    localStorage.setItem('usageCount', count + 1);
+  };
+
+  const handleShortenLink = async () => {
+    const count = getUsageCount();
+    if (count >= 15) {
+      alert("You have reached the maximum limit of 15 shortened links.");
+      window.location.href = "/signup";
       return;
     }
-    try
-        {   if(url === ""){
-              return url;
-            }
-            const response = await api.post("/shorten",{long:url});
-            const resp=await api.post("/api/getShortUrl",{long:url});
-            console.log(resp);
-            console.log(response);
-            if (resp.status === 200){
-              setUrl("http://localhost:8000/"+resp.data.short);
-              setLinkCount(linkCount + 1);
-              if(response.status === 200){
-                addListUrl(resp.data);
-                console.log(listUrls);
-              }
-            }
 
-        }
-        catch(err)
-        {
-            console.error(err);
-        }
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      alert("Please enter a valid URL starting with 'http://' or 'https://'.");
+      return;
+    }
+
+    if (listUrls.some((item) => item.longUrl === url)) {
+      alert("This URL is already shortened.");
+      return;
+    }
+
+    try {
+      let random_string;
+      let shortUrl;
+      do {
+        random_string = Math.random().toString(36).substring(2, 7);
+        shortUrl = "http://localhost:3000/linkly/" + random_string;
+      } while (listUrls.some((item) => item.shortUrl === shortUrl));
+
+      const newUrl = { longUrl: url, shortUrl: shortUrl };
+
+      const updatedUrls = [...listUrls, newUrl];
+      localStorage.setItem('urls', JSON.stringify(updatedUrls));
+      setListUrls(updatedUrls);
+      incrementUsageCount();
+      setUrl("");
+    } catch (error) {
+      console.error("Error shortening the URL", error);
+    }
   };
 
   return (
@@ -87,7 +74,7 @@ const HomePage = () => {
             placeholder="Your URL here"
           />
 
-          <button type="submit" className="abs-submit" onClick={shortenUrl}>
+          <button type="button" className="abs-submit" onClick={handleShortenLink}>
             Shorten Now!
           </button>
         </div>
@@ -96,29 +83,22 @@ const HomePage = () => {
           <span
             style={{ color: "skyblue", fontSize: "1.1rem", fontWeight: "30" }}
           >
-            {15 - linkCount}
+            {15 - getUsageCount()}
           </span>{" "}
           more links.{" "}
-          <Link to="/subscription" className="register-link">
+          <br />
+          <Link to="/signup" className="register-link">
             Register Now
           </Link>{" "}
-          to enjoy Unlimited Usage
+          <br />
+          to enjoy Unlimited Usage and many more free services such as No. of clicks, qrCode, etc.
         </p>
+      </div>
 
-        {/* Add more features like copy to clipboard etc. */}
-      </div>
-      <div className="home-premium-box">
-        <h2>Want More?</h2>
-        <h1>Go Premium!</h1>
-        <div className="button-container">
-          <button className="create-free">Create Free Account</button>
-          <button className="view">View</button>
-        </div>
-      </div>
-      <Dashboard />
+      <Dashboard urls={listUrls} />
 
       <p className="home-bottom">
-        <Link to="/subscription" className="register-link">
+        <Link to="/signup" className="register-link">
           Register Now
         </Link>{" "}
         to enjoy Unlimited History
