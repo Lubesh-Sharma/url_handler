@@ -19,8 +19,6 @@ const LoginPage = () => {
   };
   const handleLogin = async (e) => {
     e.preventDefault();
-
-    console.log("Login clicked with email:", email, "and password:", password);
     try {
       let resp = await axios.post(`${BACKEND_URL}/login`,
         {
@@ -57,10 +55,8 @@ const LoginPage = () => {
     try {
       const decoded = jwtDecode(response.credential);
       const { email, name } = decoded;
-      console.log(email, name);
 
       try {
-        console.log("Login Initiated")
         const resp = await axios.post(`${BACKEND_URL}/login`, {
           email,
           password: "abcd",

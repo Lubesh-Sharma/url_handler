@@ -29,7 +29,6 @@ function Subscription() {
         });
 
         if (response.status === 200) {
-          console.log("Authenticated");
           setUser(response.data.user);
         } else {
           throw new Error("Not authenticated");
@@ -76,7 +75,6 @@ function Subscription() {
           },
         }
       ).then(res => {
-        console.log(res.data);
         if (res.data.success === true) {
           window.location.href = res.data.data.instrumentResponse.redirectInfo.url;
         }

@@ -41,10 +41,8 @@ const SignUp = () => {
     try {
       const decoded = jwtDecode(response.credential);
       const { email, name } = decoded;
-      console.log(email, name);
 
       try {
-        console.log("Google signup request received");
         const registerResp = await axios.post(`${BACKEND_URL}/register`, {
           email,
           username: name,

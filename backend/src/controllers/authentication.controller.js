@@ -30,7 +30,6 @@ export const registerUser = asyncHandler(async (req, res) => {
         username: username,
         email: email,
         password: hash,
-        // mobileNumber: mobileNumber,
       });
       user.save()
         .then(result => {

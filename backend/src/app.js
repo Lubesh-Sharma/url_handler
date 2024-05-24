@@ -30,9 +30,11 @@ app.use(session({
 import authenticationRouter from "./routers/authentication.router.js";
 import SubscriptionRouter from "./routers/subscription.router.js";
 import paymentRouter from "./routers/payment.router.js";
+import redirectRouter from "./routers/redirect.router.js"
 
 app.use('/', SubscriptionRouter);
 app.use('/', authenticationRouter);
 app.use('/', paymentRouter);
+app.use('/',redirectRouter);
 
 export default app;
