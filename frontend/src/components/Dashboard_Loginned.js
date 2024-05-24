@@ -3,6 +3,7 @@ import { useTable } from "react-table";
 import { IoCopy } from "react-icons/io5";
 import { useMediaQuery } from "react-responsive";
 import { IoIosArrowDropdown } from "react-icons/io";
+import { IoQrCodeOutline } from "react-icons/io5";
 import axios from "axios";
 import { BACKEND_URL } from "../constants";
 
@@ -12,7 +13,7 @@ const Dashboard_Loginned = () => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const authenticateUser = async () => {
+    const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("jwtToken");
         if (!token) throw new Error("No token found");
@@ -24,53 +25,60 @@ const Dashboard_Loginned = () => {
         });
 
         if (response.status === 200) {
-          setUser(response.data.user);
+          return response.data.user;
         } else {
           throw new Error("Not authenticated");
         }
       } catch (err) {
         console.log(err);
         window.location.href = "/login";
+        return null;
       }
     };
 
-    authenticateUser();
-  }, []);
+    const fetchUrls = async (user) => {
+      try {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) throw new Error("No token found");
 
-  useEffect(() => {
-    if (user) {
-      const fetchUrls = async () => {
-        try {
-          const token = localStorage.getItem("jwtToken");
-          if (!token) throw new Error("No token found");
+        const response = await axios.get(`${BACKEND_URL}/loggedin/${user._id}/urls`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-          const response = await axios.get(`${BACKEND_URL}/loggedin/${user._id}/urls`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (response.status === 200) {
-            const transformedUrls = response.data.urls.newLink.map((newLink, index) => ({
-              shortUrl: newLink,
-              longUrl: response.data.urls.oldLink[index],
-              qrCode: "-", // Assuming you don't have QR code data in the response
-              clicks: (user.subscription === "Free" || user.subscription === null || new Date(user.endDateOfSubscription) < new Date()) ? "-" : user.Viewer[index] || 0,
-            }));
-            setUrls(transformedUrls);
-          } else {
-            throw new Error("Failed to fetch URLs");
-          }
-        } catch (error) {
-          console.error("Error fetching URLs:", error);
+        if (response.status === 200) {
+          const transformedUrls = response.data.urls.newLink.map((newLink, index) => ({
+            shortUrl: newLink,
+            longUrl: response.data.urls.oldLink[index],
+            qrCode: (user.subscription === "Free" || user.subscription === null || new Date(user.endDateOfSubscription) < new Date()) ? "-" : `http://localhost:3000/linkly/qr/${newLink.split('/').pop()}`,
+            clicks: (user.subscription === "Free" || user.subscription === null || new Date(user.endDateOfSubscription) < new Date()) ? "-" : user.Viewer[index] || 0,
+          }));
+          return transformedUrls;
+        } else {
+          throw new Error("Failed to fetch URLs");
         }
-      };
+      } catch (error) {
+        console.error("Error fetching URLs:", error);
+        return [];
+      }
+    };
 
-      fetchUrls();
-    }
-  }, [user]);
+    const fetchData = async () => {
+      const userData = await fetchUserData();
+      if (userData) {
+        setUser(userData);
+        const urlsData = await fetchUrls(userData);
+        setUrls(urlsData);
+      }
+    };
 
-  const subscription = user && user.subscription;
+    fetchData(); // Fetch initial data
+
+    const intervalId = setInterval(fetchData, 200); // Fetch data every 200ms
+
+    return () => clearInterval(intervalId); // Clean up interval on component unmount
+  }, []);
 
   const dashboardColumns = useMemo(
     () => [
@@ -95,7 +103,14 @@ const Dashboard_Loginned = () => {
       {
         Header: "QR Code",
         accessor: "qrCode",
-        Cell: ({ cell: { value } }) => ("-"),
+        Cell: ({ cell: { value } }) =>
+          value === "-" ? (
+            "-"
+          ) : (
+            <a href={value} target="_blank" rel="noopener noreferrer" style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+              <IoQrCodeOutline style={{ fontSize: "24px" }} />
+            </a>
+          ),
       },
       {
         Header: "Clicks",
@@ -106,9 +121,12 @@ const Dashboard_Loginned = () => {
     []
   );
 
-  const data = useMemo(() => Array.isArray(urls) ? urls : [], [urls]);
+  const data = useMemo(() => (Array.isArray(urls) ? urls : []), [urls]);
 
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({ columns: dashboardColumns, data });
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
+    columns: dashboardColumns,
+    data,
+  });
 
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text);
