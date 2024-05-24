@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import QRCode from 'qrcode';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useRef } from "react";
+import QRCode from "qrcode";
+import { useParams } from "react-router-dom";
 
 const QrDisplayer = () => {
   const qrRef = useRef(null);
@@ -26,28 +26,27 @@ const QrDisplayer = () => {
 
   const downloadQRCode = () => {
     const canvas = qrRef.current;
-    const url = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
+    const url = canvas.toDataURL("image/png");
+    const link = document.createElement("a");
     link.href = url;
-    link.download = 'qrcode.png';
+    link.download = "qrcode.png";
     link.click();
   };
 
   const displayUrl = `${window.location.origin}/linkly/${web_id}`;
 
   return (
-    <div className="flex flex-col justify-center items-center h-screen space-y-8">
-      <div className="flex flex-col items-center">
-        <canvas ref={qrRef}></canvas>
-        <div className="mt-4 text-center">
-          {/* <p>{displayUrl}</p> */}
+    <div className="home-container">
+      <div className="home-item-box">
+        <div className="qr">
+          <h2>QR Code of the Url</h2>
+          <canvas ref={qrRef}></canvas>
+          <div className="mt-4 text-center">{/* <p>{displayUrl}</p> */}</div>
+          <button onClick={downloadQRCode} className="qr-button">
+            Download QR
+          </button>
         </div>
       </div>
-      <button 
-        onClick={downloadQRCode} 
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
-        Download QR
-      </button>
     </div>
   );
 };
