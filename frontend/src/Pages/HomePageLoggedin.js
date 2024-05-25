@@ -35,7 +35,13 @@ const HomePageLoggedin = () => {
 
   // Event handler for Shorten Now button click
   const handleShortenNow = async () => {
-    if (user.Links.oldLink !== null && user.Links.oldLink.length >= 100 && (user.subscription === "Free" || user.subscription === null || new Date(user.endDateOfSubscription) < new Date())) {
+    if (
+      user.Links.oldLink !== null &&
+      user.Links.oldLink.length >= 100 &&
+      (user.subscription === "Free" ||
+        user.subscription === null ||
+        new Date(user.endDateOfSubscription) < new Date())
+    ) {
       alert("You have reached the maximum limit of 100 shortened links.");
       window.location.href = "/loggedin/" + user._id + "/subscription";
       return;
@@ -65,7 +71,7 @@ const HomePageLoggedin = () => {
       <div className="home-item-box">
         {user ? (
           <>
-            <h1>Welcome, {user.username}!</h1>
+            <h2>Welcome, {user.username}!</h2>
             <h1>Shorten Your Loooong Links :)</h1>
           </>
         ) : (
@@ -82,37 +88,62 @@ const HomePageLoggedin = () => {
             value={inputUrl} // Bind input value to state
             onChange={(e) => setInputUrl(e.target.value)} // Update inputUrl state on change
           />
-          <button type="submit" className="abs-submit" onClick={handleShortenNow}>
+          <button
+            type="submit"
+            className="abs-submit"
+            onClick={handleShortenNow}
+          >
             Shorten Now!
           </button>
         </div>
-        {user && (user.subscription === "Free" || user.subscription === null || new Date(user.endDateOfSubscription) < new Date()) && (
-          <p>
-            You can create{" "}
-            <span
-              style={{ color: "skyblue", fontSize: "1.1rem", fontWeight: "30" }}
-            >
-              {100 - user.Links.oldLink.length}
-            </span>{" "}
-            more links.{" "}
-            <br />
-            <Link to={`/loggedin/${user._id}/subscription`} className="register-link">
-              Take Premium Now
-            </Link>{" "}
-            <br />
-            to enjoy Unlimited Usage and many more free services such as No. of clicks, qrCode, etc.
-          </p>
-        )}
+        {user &&
+          (user.subscription === "Free" ||
+            user.subscription === null ||
+            new Date(user.endDateOfSubscription) < new Date()) && (
+            <p>
+              You can create{" "}
+              <span
+                style={{
+                  color: "skyblue",
+                  fontSize: "1.1rem",
+                  fontWeight: "30",
+                }}
+              >
+                {100 - user.Links.oldLink.length}
+              </span>{" "}
+              more links. <br />
+              <Link
+                to={`/loggedin/${user._id}/subscription`}
+                className="register-link"
+              >
+                Get Premium
+              </Link>{" "}
+              {/* <br /> */}
+              to enjoy Unlimited Usage !!!
+              {/* and many more free services such as No.
+              of clicks, qrCode, etc. */}
+            </p>
+          )}
       </div>
-      {user && (user.subscription === "Free" || user.subscription === null || new Date(user.endDateOfSubscription) < new Date()) && (
-        <div className="home-premium-box">
-          <h2>Want More?</h2>
-          <h1>Go Premium!</h1>
-          <div className="button-container">
-            <button className="create-free" onClick={() => window.location.href = `/loggedin/${user._id}/subscription`}>Go Premium</button>
+      {user &&
+        (user.subscription === "Free" ||
+          user.subscription === null ||
+          new Date(user.endDateOfSubscription) < new Date()) && (
+          <div className="home-premium-box">
+            <h2>Want More?</h2>
+            <h1>Go Premium!</h1>
+            <div className="button-container">
+              <button
+                className="create-free"
+                onClick={() =>
+                  (window.location.href = `/loggedin/${user._id}/subscription`)
+                }
+              >
+                Go Premium
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
       <Dashboard_Loginned />
     </div>
   );
