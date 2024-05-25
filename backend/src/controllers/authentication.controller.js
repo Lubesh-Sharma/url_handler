@@ -3,7 +3,6 @@ import { ApiError } from "../utilities/ApiError.js";
 import { asyncHandler } from "../utilities/asyncHandler.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-// import passport from "passport";
 
 export const registerUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
@@ -30,6 +29,7 @@ export const registerUser = asyncHandler(async (req, res) => {
         username: username,
         email: email,
         password: hash,
+        subscription: "Free",
       });
       user.save()
         .then(result => {
@@ -63,8 +63,6 @@ export const loginUser = asyncHandler(async (req, res) => {
   const user = await User.findOne({
     email: email,
   })
-  // .populate('subscription');
-
   if (!user) {
     throw new ApiError(401, "Invalid credentials");
   }

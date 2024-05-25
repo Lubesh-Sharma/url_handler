@@ -99,10 +99,19 @@ function Subscription() {
           <div className="subs-card-heading">
             <h2>Premium</h2>
           </div>
-          <p style={{ textAlign: "center", padding: "30px" }}>
+          <br />
+          <p style={{ textAlign: "center" }}>
             For those that need a massive amount of shortened URLs for your SMS
             or other campaigns.
           </p>
+          <p >
+            {/* <h2>Features</h2> */}
+
+            <li>Unlimited shortened URLs </li>
+            <li>Qr codes</li>
+            <li>No. of link clickers</li>
+          </p>
+          {/* <p></p> */}
           <div className="price-container">
             <h2>Rs.200</h2>
             <h3>/mo</h3>
@@ -110,7 +119,7 @@ function Subscription() {
           <p>Rs.2400 billed Annually</p>
           <div
             className="subs-button"
-            style={{ textAlign: "center", margin: "30px" }}
+            style={{ textAlign: "center" }}
             onClick={() => handleApplyNow("Premium", 200)}
           >
             <h2
@@ -118,9 +127,10 @@ function Subscription() {
               style={{ fontSize: "20px", fontWeight: "800" }}
             >
               {" "}
-              Buy{" "}
+              Buy now!{" "}
             </h2>
           </div>
+          <br />
         </div>
         {/* </MDBRow> */}
       </div>

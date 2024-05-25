@@ -60,6 +60,7 @@ const HomePageLoggedin = () => {
         }
       );
       alert("Link shortened successfully!");
+      setInputUrl(""); // Clear the input field after successful shortening
     } catch (err) {
       console.error(err);
       alert("Failed to shorten link. Please try again.");
@@ -118,10 +119,7 @@ const HomePageLoggedin = () => {
               >
                 Get Premium
               </Link>{" "}
-              {/* <br /> */}
               to enjoy Unlimited Usage !!!
-              {/* and many more free services such as No.
-              of clicks, qrCode, etc. */}
             </p>
           )}
       </div>
