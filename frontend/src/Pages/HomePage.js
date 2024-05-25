@@ -7,17 +7,17 @@ const HomePage = () => {
   const [listUrls, setListUrls] = useState([]);
 
   useEffect(() => {
-    const storedUrls = JSON.parse(localStorage.getItem('urls')) || [];
+    const storedUrls = JSON.parse(localStorage.getItem("urls")) || [];
     setListUrls(storedUrls);
   }, []);
 
   const getUsageCount = () => {
-    return parseInt(localStorage.getItem('usageCount')) || 0;
+    return parseInt(localStorage.getItem("usageCount")) || 0;
   };
 
   const incrementUsageCount = () => {
     let count = getUsageCount();
-    localStorage.setItem('usageCount', count + 1);
+    localStorage.setItem("usageCount", count + 1);
   };
 
   const handleShortenLink = async () => {
@@ -49,7 +49,7 @@ const HomePage = () => {
       const newUrl = { longUrl: url, shortUrl: shortUrl };
 
       const updatedUrls = [...listUrls, newUrl];
-      localStorage.setItem('urls', JSON.stringify(updatedUrls));
+      localStorage.setItem("urls", JSON.stringify(updatedUrls));
       setListUrls(updatedUrls);
       incrementUsageCount();
       setUrl("");
@@ -74,7 +74,11 @@ const HomePage = () => {
             placeholder="Your URL here"
           />
 
-          <button type="button" className="abs-submit" onClick={handleShortenLink}>
+          <button
+            type="button"
+            className="abs-submit"
+            onClick={handleShortenLink}
+          >
             Shorten Now!
           </button>
         </div>
@@ -85,13 +89,12 @@ const HomePage = () => {
           >
             {15 - getUsageCount()}
           </span>{" "}
-          more links.{" "}
-          <br />
+          more links. <br />
           <Link to="/signup" className="register-link">
             Register Now
           </Link>{" "}
-          <br />
-          to enjoy Unlimited Usage and many more free services such as No. of clicks, qrCode, etc.
+          {/* <br /> */}
+          to create more links and enjoy many more free services !!!
         </p>
       </div>
 
