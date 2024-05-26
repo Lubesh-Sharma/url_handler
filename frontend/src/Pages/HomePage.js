@@ -104,7 +104,7 @@ const HomePage = () => {
         <Link to="/signup" className="register-link">
           Register Now
         </Link>{" "}
-        to enjoy Unlimited History
+        to create more links and enjoy many more free services !!!
       </p>
     </div>
   );

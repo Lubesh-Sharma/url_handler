@@ -19,7 +19,6 @@ const QrDisplayer = () => {
     };
 
     const url = `${window.location.origin}/linkly/${web_id}`;
-    console.log("WebId is", web_id);
 
     generateQRCode(url);
   }, [web_id]);
