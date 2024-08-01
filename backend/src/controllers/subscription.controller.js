@@ -4,7 +4,6 @@ import { asyncHandler } from "../utilities/asyncHandler.js";
 
 export const changeUserSubscription = asyncHandler(async (req, res) => {
     const user_id = req.params.user_id;
-    console.log(user_id);
     const user = await User.findById(user_id);
 
     if (!user) {

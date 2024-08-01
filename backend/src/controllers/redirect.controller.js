@@ -66,7 +66,7 @@ export const increaseViewer = asyncHandler(async (req, res) => {
                 await user.save();
                 res.status(200).json({
                     message: "Viewer count increased successfully",
-                    oldLink: user.Links.oldLink
+                    oldLink: user.Links.oldLink[index]
                 });
             } else {
                 console.log("Link not found in user's Links")
